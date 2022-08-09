@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:oasis_assignment/components/multiselect_widget.dart';
 import 'package:oasis_assignment/components/dropdown_widget.dart';
+import 'package:oasis_assignment/network/form_handler.dart';
 import 'package:provider/provider.dart';
 import 'add_field_page.dart';
 import 'model/form.dart';
-import 'dart:developer' as developer;
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
 
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
   void _navigateToAddFieldPage(BuildContext context) {
     Navigator.push(
         context,
@@ -60,20 +65,29 @@ class HomePage extends StatelessWidget {
                   //   width: 16,
                   // ),
                   ElevatedButton.icon(
-                      onPressed: () {
-                        Provider.of<CustomForm>(context, listen: false)
-                            .fieldItems
-                            .forEach((element) {
-                          if (element is CustomDropDown) {
-                            developer.log(element.model.toString(),
-                                name: 'model_data');
-                          } else if (element is CheckboxList) {
-                            developer.log(element.model.toString(),
-                                name: 'model_data');
-                          }
-                        });
-                        const snackBar = SnackBar(content: Text('Form Saved'));
-                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                      onPressed: () async {
+                        const savingSnackBar =
+                            SnackBar(content: Text('Saving Form....'));
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(savingSnackBar);
+                        var ls = Provider.of<CustomForm>(context, listen: false)
+                            .fieldItems;
+                        var reqBody = {
+                          'responses': List.generate(ls.length, (index) {
+                            var item = ls[index];
+                            if (item is CustomDropDown) {
+                              return item.model.getDesc();
+                            } else if (item is CheckboxList) {
+                              return item.model.getDesc();
+                            }
+                          })
+                        };
+                        await FormHandler.saveForm(reqBody);
+                        const savedSnackBar =
+                            SnackBar(content: Text('Form Saved'));
+                        if (!mounted) return;
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(savedSnackBar);
                       },
                       icon: const Icon(
                         Icons.done,

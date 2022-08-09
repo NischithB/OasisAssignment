@@ -8,6 +8,16 @@ class DropDownModel extends FieldModel {
     dropdownValue = items[0];
   }
 
+  Map getDesc() {
+    var selections = {
+      for (var item in options) item: item == dropdownValue ? true : false
+    };
+    return {
+      'label': label,
+      'selections': selections,
+    };
+  }
+
   @override
   String toString() {
     return """

@@ -8,6 +8,15 @@ class MultiSelectModel extends FieldModel {
     options = items;
     checkValues = List.filled(items.length, false);
   }
+
+  Map getDesc() {
+    var selections = Map<String, bool>.fromIterables(options, checkValues);
+    return {
+      'label': label,
+      'selections': selections,
+    };
+  }
+
   @override
   String toString() {
     Map<String, bool> str = {};
